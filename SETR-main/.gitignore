@@ -1,0 +1,68 @@
+# ------------------------------
+# Python cache/artifacts
+# ------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage*
+
+# ------------------------------
+# Virtual environments / local env
+# ------------------------------
+.venv/
+venv/
+env/
+ENV/
+*.env
+*.dotenv
+
+# ------------------------------
+# OS / IDE
+# ------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ------------------------------
+# Data and generated outputs (keep code clean)
+# ------------------------------
+data/
+outputs/
+test_results/
+logs/
+vessel_segmentation/logs/
+vessel_segmentation/checkpoints/
+
+# ------------------------------
+# Model weights / large artifacts
+# ------------------------------
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.npz
+*.npy
+*.tfevents.*
+events.out.tfevents.*
+
+# ------------------------------
+# Logs
+# ------------------------------
+*.log
+nohup.out
+
+# ------------------------------
+# Node / web (if any)
+# ------------------------------
+node_modules/
+dist/
+build/
+
