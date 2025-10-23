@@ -160,6 +160,7 @@ def get_model(config):
         num_layers=config.num_layers,
         num_heads=config.num_heads
     )
+    # 默认按配置可能冻结 transformer encoder，只训练 MLA/decoder/head
     if getattr(config, 'freeze_transformer', False):
         import os
         import warnings
@@ -256,29 +257,28 @@ def get_model(config):
                 print(f"Successfully loaded {len(loaded_keys)} parameters from pretrained weights")
                 print(f"Loaded components: {', '.join(sorted(set(k.split('.')[0] for k in loaded_keys)))}")
         # 仅冻结成功加载的骨干参数，避免冻结随机初始化的模块
+        # 这里简化策略：当配置要求冻结 transformer 时，视为要冻结 encoder（patch_embed/pos_embed/blocks/norm）
+        # 保证 MLA/proj/decoder/head 的参数可训练
         frozen_params = 0
         trainable_params = 0
+        backbone_prefixes = ('patch_embed', 'pos_embed', 'blocks', 'norm')
         for name, p in model.named_parameters():
-            is_backbone = (
-                name.startswith('patch_embed') or
-                name.startswith('pos_embed') or
-                name.startswith('blocks') or
-                name.startswith('norm')
-            )
-            if is_backbone:
-                # 与 state_dict 键名对齐：参数名即键名
-                if name in locals().get('loaded_keys', set()):
-                    p.requires_grad = False
-                    frozen_params += p.numel()
-                else:
-                    # 未加载成功的骨干参数保持可训练，避免冻结随机权重
-                    p.requires_grad = True
-                    trainable_params += p.numel()
+            if any(name.startswith(bp) for bp in backbone_prefixes):
+                # 如果加载到了预训练权重，直接冻结骨干参数；否则也按配置冻结（用户希望冻结encoder以只训练decoder）
+                p.requires_grad = False
+                frozen_params += p.numel()
             else:
                 p.requires_grad = True
                 trainable_params += p.numel()
-        
-        if frozen_params > 0:
+
+        # pos_embed 可能是 nn.Parameter，不在 named_parameters 的 name 中单独体现为 'pos_embed'，也尝试按 attribute 冻结
+        if hasattr(model, 'pos_embed') and isinstance(model.pos_embed, torch.nn.Parameter):
+            try:
+                model.pos_embed.requires_grad = False
+            except Exception:
+                pass
+
+        if frozen_params + trainable_params > 0:
             print(f"Frozen parameters: {frozen_params:,} ({frozen_params/(frozen_params+trainable_params)*100:.1f}%)")
             print(f"Trainable parameters: {trainable_params:,} ({trainable_params/(frozen_params+trainable_params)*100:.1f}%)")
     return model

@@ -1,0 +1,15 @@
+# requirements for CUDA 12.8 + PyTorch 2.8.0
+# Use conda recommended install for pytorch + cudatoolkit=12.8
+
+torch==2.8.0
+torchvision
+tensorboard
+scipy
+numpy
+matplotlib
+opencv_python
+tqdm
+Pillow
+h5py
+einops
+scikit-learn

@@ -28,6 +28,10 @@ from vessel_segmentation.utils import set_seed, save_checkpoint, DiceLoss, compu
 
 
 def setup_distributed(rank, world_size):
+    # If launched by torchrun, rank and world_size will be provided via env vars
+    if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+        rank = int(os.environ['RANK'])
+        world_size = int(os.environ['WORLD_SIZE'])
     if 'MASTER_ADDR' not in os.environ:
         os.environ['MASTER_ADDR'] = '127.0.0.1'
     if 'MASTER_PORT' not in os.environ:
