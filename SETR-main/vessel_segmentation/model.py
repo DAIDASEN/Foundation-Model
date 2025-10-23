@@ -162,12 +162,22 @@ def get_model(config):
     )
     if getattr(config, 'freeze_transformer', False):
         import os
+        import warnings
         ckpt_path = getattr(config, 'pretrained_transformer_path', None)
         if ckpt_path and not os.path.isabs(ckpt_path) and not os.path.exists(ckpt_path):
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             alt_path = os.path.join(project_root, ckpt_path)
             if os.path.exists(alt_path):
                 ckpt_path = alt_path
+        if ckpt_path and os.path.exists(ckpt_path):
+            print(f"Loading pretrained weights from: {ckpt_path}")
+        elif ckpt_path:
+            warnings.warn(
+                f"Pretrained weights file not found: {ckpt_path}\n"
+                f"Transformer encoder will be randomly initialized.\n"
+                f"For best results, please provide the VFM_Fundus_weights.pth file.",
+                UserWarning
+            )
         if ckpt_path and os.path.exists(ckpt_path):
             try:
                 ckpt = torch.load(ckpt_path, map_location='cpu', weights_only=False)
@@ -243,7 +253,11 @@ def get_model(config):
                                 loadable[k] = v
                 model.load_state_dict(loadable, strict=False)
                 loaded_keys = set(loadable.keys())
+                print(f"Successfully loaded {len(loaded_keys)} parameters from pretrained weights")
+                print(f"Loaded components: {', '.join(sorted(set(k.split('.')[0] for k in loaded_keys)))}")
         # 仅冻结成功加载的骨干参数，避免冻结随机初始化的模块
+        frozen_params = 0
+        trainable_params = 0
         for name, p in model.named_parameters():
             is_backbone = (
                 name.startswith('patch_embed') or
@@ -255,9 +269,15 @@ def get_model(config):
                 # 与 state_dict 键名对齐：参数名即键名
                 if name in locals().get('loaded_keys', set()):
                     p.requires_grad = False
+                    frozen_params += p.numel()
                 else:
                     # 未加载成功的骨干参数保持可训练，避免冻结随机权重
                     p.requires_grad = True
+                    trainable_params += p.numel()
             else:
                 p.requires_grad = True
+                trainable_params += p.numel()
+        
+        print(f"Frozen parameters: {frozen_params:,} ({frozen_params/(frozen_params+trainable_params)*100:.1f}%)")
+        print(f"Trainable parameters: {trainable_params:,} ({trainable_params/(frozen_params+trainable_params)*100:.1f}%)")
     return model
