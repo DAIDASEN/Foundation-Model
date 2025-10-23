@@ -1,3 +1,28 @@
+# SETR Vessel Segmentation
+
+基于 SETR (Segmentation Transformer) 的血管分割项目，支持分布式训练。
+
+## 快速开始
+
+### ViT-Base/16 冻结训练 (推荐)
+
+使用预训练的 ViT-Base/16 编码器，仅训练 MLA 解码器：
+
+```bash
+# 4 GPU 分布式训练
+bash train_vitb16_4gpus.sh exp_vitb16_frozen
+```
+
+详细文档：
+- [中文训练指南](TRAINING_GUIDE_CN.md)
+- [English Training Guide](TRAINING_GUIDE.md)
+
+### 配置测试
+
+```bash
+python3 test_vitb16_config.py
+```
+
 ## 训练
 
 ```bash

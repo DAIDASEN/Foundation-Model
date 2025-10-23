@@ -278,6 +278,7 @@ def get_model(config):
                 p.requires_grad = True
                 trainable_params += p.numel()
         
-        print(f"Frozen parameters: {frozen_params:,} ({frozen_params/(frozen_params+trainable_params)*100:.1f}%)")
-        print(f"Trainable parameters: {trainable_params:,} ({trainable_params/(frozen_params+trainable_params)*100:.1f}%)")
+        if frozen_params > 0:
+            print(f"Frozen parameters: {frozen_params:,} ({frozen_params/(frozen_params+trainable_params)*100:.1f}%)")
+            print(f"Trainable parameters: {trainable_params:,} ({trainable_params/(frozen_params+trainable_params)*100:.1f}%)")
     return model
