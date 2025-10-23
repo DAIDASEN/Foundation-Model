@@ -43,14 +43,23 @@ class Config:
 class ConfigViTB16Frozen(Config):
     """
     与 VFM_Fundus_weights.pth 对齐的配置：
-    - ViT-B/16 骨干（patch_size=16, hidden=768, heads=12, 推荐 12 层）
+    - ViT-B/16 骨干（patch_size=16, hidden=768, heads=12, 12 层）
     - 冻结 Transformer，仅训练 MLA/解码器/头
+    - 输入分辨率: 224x224 (14x14 patches with patch_size=16)
     - 其余数据与优化参数沿用父类默认
     注意：使用该配置时建议切换保存目录，避免覆盖其他实验。
     """
+    # ViT-Base/16 架构参数（与预训练权重对齐）
+    input_size = 224  # 14x14 patches = 196 patches + 1 cls token = 197 total
     patch_size = 16
-    num_layers = 12
+    hidden_size = 768  # ViT-Base hidden dimension
+    num_layers = 12    # ViT-Base depth
+    num_heads = 12     # ViT-Base attention heads
+    
+    # 冻结transformer encoder，仅训练decoder
     freeze_transformer = True
-    # 可选：为区分实验，可设置默认子目录（也可通过 --flag 覆盖）
+    pretrained_transformer_path = 'VFM_Fundus_weights.pth'
+    
+    # 为区分实验，使用专用保存目录（也可通过 --flag 覆盖）
     save_dir = 'vessel_segmentation/checkpoints/vitb16_frozen'
     log_dir = 'vessel_segmentation/logs/vitb16_frozen'

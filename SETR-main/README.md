@@ -1,3 +1,52 @@
+# SETR Vessel Segmentation
+
+基于 SETR (Segmentation Transformer) 的血管分割项目，支持分布式训练。
+
+## 🚀 快速开始
+
+### 环境要求
+- 4 × NVIDIA GPU (如 RTX 3060)
+- CUDA 11.8
+- Python 3.7+
+
+### ViT-Base/16 冻结训练 (推荐)
+
+使用预训练的 ViT-Base/16 编码器，仅训练 MLA 解码器：
+
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 准备预训练权重 (VFM_Fundus_weights.pth)
+bash setup_weights.sh /path/to/VFM_Fundus_weights.pth
+
+# 3. 测试配置
+python3 test_vitb16_config.py
+
+# 4. 开始训练 (4 GPU)
+bash train_vitb16_4gpus.sh my_experiment
+```
+
+## 📚 文档
+
+- **[快速上手指南 (中文)](QUICKSTART_CN.md)** - 新手必读
+- **[完整训练指南 (中文)](TRAINING_GUIDE_CN.md)** - 详细配置说明
+- **[Complete Training Guide (English)](TRAINING_GUIDE.md)** - Full documentation
+
+## 📊 训练监控
+
+```bash
+tensorboard --logdir vessel_segmentation/logs/my_experiment
+```
+
+## 🔧 配置示例
+
+查看不同 GPU 配置的训练参数：
+
+```bash
+python3 training_examples.py --gpus 4 --batch_size 4
+```
+
 ## 训练
 
 ```bash
